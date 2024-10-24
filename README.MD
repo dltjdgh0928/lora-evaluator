@@ -25,6 +25,7 @@ pip install mmcv-full==1.6.2 -f https://download.openmmlab.com/mmcv/dist/cu113/t
 pip install mmdet==2.28.2
 pip install mmpose==0.29.0
 pip install numpy==1.23.5
+pip install mediapipe
 ```
 
 ⚙️ This package has been tested on Windows.

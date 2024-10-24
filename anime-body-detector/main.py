@@ -10,11 +10,10 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
-# 이미지 파일의 경우 이것을 사용하세요.:
-IMAGE_FILES = ["./3cd3e1e48a876425ede16db855b6ddd0.jpg"]
+# 원본 이미지 폴더와 샘플 이미지 폴더 경로
+original_image_folder = "./sample/original_images"
+sample_image_folder = "./sample/inference_images"
 BG_COLOR = (192, 192, 192)  # 회색
-
-print("Starting pose estimation...")  # 프로그램 시작 확인
 
 def calculate_normalized_distance(landmark1, landmark2):
     """정규화된 유클리드 거리를 계산하는 함수"""
@@ -28,26 +27,26 @@ def calculate_ratio(value1, value2):
         return 0
     return value1 / value2
 
-with mp_pose.Pose(
-        static_image_mode=True,
-        model_complexity=2,
-        enable_segmentation=True,
-        min_detection_confidence=0.2) as pose:
-    for idx, file in enumerate(IMAGE_FILES):
-        print(f"Processing file: {file}")  # 파일 처리 시작 확인
-        image = cv2.imread(file)
-        if image is None:
-            print(f"Failed to read image: {file}")  # 이미지 파일 읽기 실패 시 출력
-            continue
+def calculate_error_rate(sample_value, original_value):
+    """오차율을 계산하는 함수"""
+    return abs((sample_value - original_value) / original_value) * 100
 
-        # 처리 전 BGR 이미지를 RGB로 변환합니다.
+def analyze_image(image_path):
+    """이미지에서 신체 비율을 분석하는 함수"""
+    with mp_pose.Pose(static_image_mode=True, model_complexity=2, enable_segmentation=True, min_detection_confidence=0.1) as pose:
+        image = cv2.imread(image_path)
+        if image is None:
+            print(f"Failed to read image: {image_path}")
+            return None
+
+        image_height, image_width, _ = image.shape
         results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
         if not results.pose_landmarks:
-            print("No pose landmarks found.")  # 포즈 랜드마크가 없는 경우 출력
-            continue
+            print(f"No pose landmarks found in image: {image_path}")
+            return None
 
-        # 각 랜드마크 간의 거리 계산 (정규화된 좌표로 계산)
+        # 각 랜드마크 간의 거리 계산
         landmarks = results.pose_landmarks.landmark
 
         # 오른쪽 팔과 다리
@@ -65,64 +64,59 @@ with mp_pose.Pose(
         left_calf = calculate_normalized_distance(landmarks[27], landmarks[29])
 
         # 비율 계산
-        # 1. 어깨 <-> 허리 비율
         shoulder_to_waist_ratio = calculate_ratio(shoulder_width, waist_width)
-        
-        # 2. (오른 윗팔 + 왼 윗팔의 평균) <-> (오른 아랫팔 + 왼 아랫팔의 평균)
         upper_to_forearm_ratio = calculate_ratio(right_upper_arm + left_upper_arm, right_forearm + left_forearm)
-
-        # 3. (오른 윗다리 + 왼 윗다리의 평균) <-> (오른 아랫다리 + 왼 아랫다리의 평균)
         thigh_to_calf_ratio = calculate_ratio(right_thigh + left_thigh, right_calf + left_calf)
-
-        # 4. 전체 팔 <-> 전체 다리 비율
         total_arm = right_upper_arm + right_forearm + left_upper_arm + left_forearm
         total_leg = right_thigh + right_calf + left_thigh + left_calf
         arm_to_leg_ratio = calculate_ratio(total_arm, total_leg)
-        
-        # 5. 허리 <-> 전체 다리 비율
-        waist_to_leg_ratio = calculate_ratio(waist_width, total_leg/2)
-        
-        # 비율 출력
-        print(f"Shoulder to Waist Ratio: {shoulder_to_waist_ratio:.4f}")
-        print(f"Upper Arm to Forearm Ratio (average): {upper_to_forearm_ratio:.4f}")
-        print(f"Thigh to Calf Ratio (average): {thigh_to_calf_ratio:.4f}")
-        print(f"Total Arm to Total Leg Ratio: {arm_to_leg_ratio:.4f}")
-        print(f"Waist to Total Leg Ratio: {waist_to_leg_ratio:.4f}")
+        waist_to_leg_ratio = calculate_ratio(waist_width, total_leg / 2)
 
-        annotated_image = image.copy()
-        # 이미지를 분할합니다.
-        condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
-        bg_image = np.zeros(image.shape, dtype=np.uint8)
-        bg_image[:] = BG_COLOR
-        annotated_image = np.where(condition, annotated_image, bg_image)
+        return {
+            'shoulder_to_waist': shoulder_to_waist_ratio,
+            'upper_to_forearm': upper_to_forearm_ratio,
+            'thigh_to_calf': thigh_to_calf_ratio,
+            'arm_to_leg': arm_to_leg_ratio,
+            'waist_to_leg': waist_to_leg_ratio
+        }
 
-        # 이미지 위에 포즈 랜드마크를 그립니다.
-        mp_drawing.draw_landmarks(
-            annotated_image,
-            results.pose_landmarks,
-            mp_pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+def analyze_folder(folder_path):
+    """폴더 내의 모든 이미지를 분석하고 평균 비율 값을 계산"""
+    total_ratios = {
+        'shoulder_to_waist': 0,
+        'upper_to_forearm': 0,
+        'thigh_to_calf': 0,
+        'arm_to_leg': 0,
+        'waist_to_leg': 0
+    }
+    num_images = 0
 
-        # Matplotlib을 사용하여 플롯을 그리고 랜드마크 번호를 출력
-        plt.figure(figsize=(10, 10))
-        plt.imshow(cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB))
-        
-        # 각 랜드마크 번호를 이미지에 출력
-        for landmark_id, landmark in enumerate(results.pose_landmarks.landmark):
-            x = landmark.x * image.shape[1]
-            y = landmark.y * image.shape[0]
-            plt.text(x, y, str(landmark_id), color='red', fontsize=12, ha='center')
+    for filename in os.listdir(folder_path):
+        image_path = os.path.join(folder_path, filename)
+        ratios = analyze_image(image_path)
+        if ratios is not None:
+            for key in total_ratios.keys():
+                total_ratios[key] += ratios[key]
+            num_images += 1
 
-        plt.axis('off')  # 축을 숨깁니다.
-        plt.show()  # 이미지를 표시합니다.
+    if num_images == 0:
+        print(f"No valid images found in folder: {folder_path}")
+        return None
 
-        # 결과 이미지를 파일로 저장
-        output_path = os.path.join(current_directory, 'annotated_image' + str(idx) + '.png')
-        print(f"Saving annotated image at: {output_path}")  # 파일 경로 출력
-        success = cv2.imwrite(output_path, annotated_image)
-        if success:
-            print(f"Image saved successfully at: {output_path}")
-        else:
-            print(f"Failed to save image at: {output_path}")
+    # 평균 계산
+    average_ratios = {key: total_ratios[key] / num_images for key in total_ratios.keys()}
+    return average_ratios
 
-print("Pose estimation complete.")
+# 원본 이미지 폴더와 샘플 이미지 폴더 분석
+original_average_ratios = analyze_folder(original_image_folder)
+sample_average_ratios = analyze_folder(sample_image_folder)
+
+if original_average_ratios and sample_average_ratios:
+    # 평균 오차율 계산
+    for key in original_average_ratios.keys():
+        sample_value = sample_average_ratios[key]
+        original_value = original_average_ratios[key]
+        error_rate = calculate_error_rate(sample_value, original_value)
+        print(f"{key.replace('_', ' ').title()} Ratio: Sample Avg={sample_value:.4f}, Original Avg={original_value:.4f}, Error={error_rate:.2f}%")
+else:
+    print("One of the folders did not return valid analysis results.")
