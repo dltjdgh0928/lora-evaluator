@@ -245,8 +245,8 @@ def load_images_from_folder(folder):
 
 # print(preds)
 
-original_images_folder = './original_images'
-sample_images_folder = './sample_images'
+original_images_folder = './sample/elysia/original_images'
+sample_images_folder = './sample/elysia/inference_images'
 
 original_images = load_images_from_folder(original_images_folder)
 sample_images = load_images_from_folder(sample_images_folder)
