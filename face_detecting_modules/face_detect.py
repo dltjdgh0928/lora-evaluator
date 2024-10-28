@@ -224,11 +224,13 @@ def calculate_average_and_std_ratios(image_list):
     if valid_images == 0:
         return None, valid_images
 
-    # 각 비율에 대한 평균 및 표준 편차 계산
+    # 각 비율에 대한 평균, 표준 편차, 최소값 및 최대값 계산
     average_ratios = {key: np.mean(values) for key, values in ratios_list.items()}
     std_ratios = {key: np.std(values) for key, values in ratios_list.items()}
+    min_ratios = {key: np.min(values) for key, values in ratios_list.items()}
+    max_ratios = {key: np.max(values) for key, values in ratios_list.items()}
 
-    return average_ratios, std_ratios, valid_images
+    return average_ratios, std_ratios, min_ratios, max_ratios, valid_images
 
 def calculate_percentage_difference_with_values(average1, average2):
     percentage_diff_with_values = {}

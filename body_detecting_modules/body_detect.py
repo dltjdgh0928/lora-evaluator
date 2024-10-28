@@ -4,6 +4,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from math import sqrt
+from tqdm import tqdm  # tqdm을 사용한 진행률 표시
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -90,23 +91,33 @@ def calculate_average_and_std_ratios(folder_path):
         'waist_to_leg': []
     }
     num_images = 0
+    valid_images = 0  # 비율 계산에 성공한 이미지 수
 
-    for filename in os.listdir(folder_path):
+    image_files = os.listdir(folder_path)
+    total_images = len(image_files)  # 전체 이미지 수
+
+    print(f"총 {total_images}장의 이미지가 발견되었습니다.")
+
+    for filename in tqdm(image_files, desc="이미지 처리 진행 중"):
         image_path = os.path.join(folder_path, filename)
         ratios = analyze_image(image_path)
         if ratios is not None:
             for key in total_ratios.keys():
                 total_ratios[key].append(ratios[key])
-            num_images += 1
+            valid_images += 1
+        num_images += 1
 
-    if num_images == 0:
+    if valid_images == 0:
         print(f"No valid images found in folder: {folder_path}")
-        return None, None
+        return None, None, None, None, valid_images
 
-    # 평균 및 표준 편차 계산
+    # 평균, 표준 편차, 최소값 및 최대값 계산
     average_ratios = {key: np.mean(values) for key, values in total_ratios.items()}
     std_ratios = {key: np.std(values) for key, values in total_ratios.items()}
-    return average_ratios, std_ratios
+    min_ratios = {key: np.min(values) for key, values in total_ratios.items()}
+    max_ratios = {key: np.max(values) for key, values in total_ratios.items()}
+
+    return average_ratios, std_ratios, min_ratios, max_ratios, valid_images
 
 # # 원본 이미지 폴더와 샘플 이미지 폴더 분석
 # original_average_ratios, original_std_ratios = calculate_average_and_std_ratios(original_image_folder)
