@@ -1,10 +1,10 @@
 # Lora-Evaluator
 
 [![Generic badge](https://img.shields.io/badge/CUDA-11.4-brightgreen.svg)](https://developer.nvidia.com/cuda-11-4-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exe_local)
-![Generic badge](https://img.shields.io/badge/pytorch-1.12.1-orange.svg)
-![Generic badge](https://img.shields.io/badge/mmcv_full-1.6.2-red.svg)
-![Generic badge](https://img.shields.io/badge/mmdet-1.12.1-red.svg)
-![Generic badge](https://img.shields.io/badge/mmpose-1.12.1-red.svg)
+[![Generic badge](https://img.shields.io/badge/pytorch-1.12.1-orange.svg)](https://pytorch.org/get-started/previous-versions/)
+[![Generic badge](https://img.shields.io/badge/mmcv_full-1.6.2-red.svg)](https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html)
+[![Generic badge](https://img.shields.io/badge/mmdet-1.12.1-red.svg)](https://github.com/open-mmlab/mmdetection)
+[![Generic badge](https://img.shields.io/badge/mmpose-1.12.1-red.svg)](https://github.com/open-mmlab/mmpose)
 
  Lora-Evaluator is a powerful tool designed to combine anime face detection and body detection to analyze how similar a character is to its original form after model training. This repository integrates state-of-the-art technologies to assess the accuracy and consistency between the original and trained character models.
 
