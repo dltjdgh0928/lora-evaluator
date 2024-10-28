@@ -11,8 +11,8 @@ mp_pose = mp.solutions.pose
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # 원본 이미지 폴더와 샘플 이미지 폴더 경로
-original_image_folder = "./sample/original_images"
-sample_image_folder = "./sample/inference_images"
+# original_image_folder = "./sample/original_images"
+# sample_image_folder = "./sample/inference_images"
 BG_COLOR = (192, 192, 192)  # 회색
 
 def calculate_normalized_distance(landmark1, landmark2):
@@ -80,14 +80,14 @@ def analyze_image(image_path):
             'waist_to_leg': waist_to_leg_ratio
         }
 
-def analyze_folder(folder_path):
-    """폴더 내의 모든 이미지를 분석하고 평균 비율 값을 계산"""
+def calculate_average_and_std_ratios(folder_path):
+    """폴더 내의 모든 이미지를 분석하고 평균 및 표준 편차를 계산"""
     total_ratios = {
-        'shoulder_to_waist': 0,
-        'upper_to_forearm': 0,
-        'thigh_to_calf': 0,
-        'arm_to_leg': 0,
-        'waist_to_leg': 0
+        'shoulder_to_waist': [],
+        'upper_to_forearm': [],
+        'thigh_to_calf': [],
+        'arm_to_leg': [],
+        'waist_to_leg': []
     }
     num_images = 0
 
@@ -96,27 +96,29 @@ def analyze_folder(folder_path):
         ratios = analyze_image(image_path)
         if ratios is not None:
             for key in total_ratios.keys():
-                total_ratios[key] += ratios[key]
+                total_ratios[key].append(ratios[key])
             num_images += 1
 
     if num_images == 0:
         print(f"No valid images found in folder: {folder_path}")
-        return None
+        return None, None
 
-    # 평균 계산
-    average_ratios = {key: total_ratios[key] / num_images for key in total_ratios.keys()}
-    return average_ratios
+    # 평균 및 표준 편차 계산
+    average_ratios = {key: np.mean(values) for key, values in total_ratios.items()}
+    std_ratios = {key: np.std(values) for key, values in total_ratios.items()}
+    return average_ratios, std_ratios
 
-# 원본 이미지 폴더와 샘플 이미지 폴더 분석
-original_average_ratios = analyze_folder(original_image_folder)
-sample_average_ratios = analyze_folder(sample_image_folder)
+# # 원본 이미지 폴더와 샘플 이미지 폴더 분석
+# original_average_ratios, original_std_ratios = calculate_average_and_std_ratios(original_image_folder)
+# sample_average_ratios, sample_std_ratios = calculate_average_and_std_ratios(sample_image_folder)
 
-if original_average_ratios and sample_average_ratios:
-    # 평균 오차율 계산
-    for key in original_average_ratios.keys():
-        sample_value = sample_average_ratios[key]
-        original_value = original_average_ratios[key]
-        error_rate = calculate_error_rate(sample_value, original_value)
-        print(f"{key.replace('_', ' ').title()} Ratio: Sample Avg={sample_value:.4f}, Original Avg={original_value:.4f}, Error={error_rate:.2f}%")
-else:
-    print("One of the folders did not return valid analysis results.")
+# if original_average_ratios and sample_average_ratios:
+#     # 평균 오차율 계산
+#     for key in original_average_ratios.keys():
+#         sample_value = sample_average_ratios[key]
+#         original_value = original_average_ratios[key]
+#         error_rate = calculate_error_rate(sample_value, original_value)
+#         print(f"{key.replace('_', ' ').title()} Ratio: Sample Avg={sample_value:.4f}, Original Avg={original_value:.4f}, Error={error_rate:.2f}%")
+#         print(f"Original Std Dev={original_std_ratios[key]:.4f}, Sample Std Dev={sample_std_ratios[key]:.4f}")
+# else:
+#     print("One of the folders did not return valid analysis results.")

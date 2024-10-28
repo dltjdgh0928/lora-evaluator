@@ -1,5 +1,6 @@
 #@title import packages
 
+from tqdm import tqdm  # tqdm을 사용한 진행률 표시
 import os
 import cv2
 import matplotlib.pyplot as plt
@@ -128,16 +129,21 @@ draw_contour = True  #@param {'type': 'boolean'}
 skip_contour_with_low_score = True  #@param {'type': 'boolean'}
 
 chin_index = 2  # 턱
-nose_tip_index = 23  # 코 끝
-left_mouth_index = 24  # 입의 왼쪽 끝
-right_mouth_index = 26  # 입의 오른쪽 끝
-mouth_center_index = 25  # 입의 중앙
-left_brow_index = 6  # 왼쪽 눈썹 중앙
-right_brow_index = 9  # 오른쪽 눈썹 중앙
+
+nose_tip_index = 23  # 코끝
+
+left_mouth_index = 24  # 입 - 왼쪽
+right_mouth_index = 26  # 입 - 오른쪽
+up_mouth_index = 25  # 입 - 윗쪽
+
+left_brow_index = 6  # 눈썹 - 왼쪽
+right_brow_index = 9  # 눈썹 - 오른쪽
+
 eye_inner_left_index = 13  # 왼쪽 안쪽 눈
 left_eye_index = 11  # 왼쪽 바깥 눈
 eye_inner_right_index = 17  # 오른쪽 안쪽 눈
 right_eye_index = 19  # 오른쪽 바깥 눈
+
 face_left_index = 0  # 얼굴 광대 왼쪽
 face_right_index = 4  # 얼굴 광대 오른쪽
 
@@ -166,22 +172,18 @@ def calculate_ratios(landmarks):
     eye_to_nose_ratio = eye_to_nose_distance / face_height
 
     # 3. 코-입 거리 비율
-    nose_to_mouth_distance = calculate_distance(landmarks[nose_tip_index], landmarks[mouth_center_index])
+    nose_to_mouth_distance = calculate_distance(landmarks[nose_tip_index], landmarks[up_mouth_index])
     nose_to_mouth_ratio = nose_to_mouth_distance / face_height
 
-    # 4. 입 너비 비율
-    mouth_width = calculate_distance(landmarks[left_mouth_index], landmarks[right_mouth_index])
-    mouth_width_ratio = mouth_width / face_width
-
-    # 5. 턱 길이 비율 (턱 끝에서 코 끝까지)
+    # 4. 턱 길이 비율 (턱 끝에서 코 끝까지)
     chin_to_nose_distance = calculate_distance(landmarks[chin_index], landmarks[nose_tip_index])
     chin_length_ratio = chin_to_nose_distance / face_height
 
-    # 6. 눈썹 높이 비율 (눈과 눈썹 사이 거리)
+    # 5. 눈썹 높이 비율 (눈과 눈썹 사이 거리)
     eyebrow_height = (calculate_distance(landmarks[left_eye_index], landmarks[left_brow_index]) + calculate_distance(landmarks[right_eye_index], landmarks[right_brow_index])) / 2
     eyebrow_height_ratio = eyebrow_height / face_height
 
-    # 7. 미간 거리 비율 (눈 안쪽 모서리 사이 거리)
+    # 6. 미간 거리 비율 (눈 안쪽 모서리 사이 거리)
     intercanthal_distance = calculate_distance(landmarks[eye_inner_left_index], landmarks[eye_inner_right_index])
     intercanthal_ratio = intercanthal_distance / face_width
 
@@ -189,47 +191,53 @@ def calculate_ratios(landmarks):
         'interocular_ratio': interocular_ratio,
         'eye_to_nose_ratio': eye_to_nose_ratio,
         'nose_to_mouth_ratio': nose_to_mouth_ratio,
-        'mouth_width_ratio': mouth_width_ratio,
         'chin_length_ratio': chin_length_ratio,
         'eyebrow_height_ratio': eyebrow_height_ratio,
         'intercanthal_ratio': intercanthal_ratio
     }
-
-def calculate_average_ratios(image_list, detector):
-    total_ratios = {
-        'interocular_ratio': 0,
-        'eye_to_nose_ratio': 0,
-        'nose_to_mouth_ratio': 0,
-        'mouth_width_ratio': 0,
-        'chin_length_ratio': 0,
-        'eyebrow_height_ratio': 0,
-        'intercanthal_ratio': 0
+    
+def calculate_average_and_std_ratios(image_list):
+    ratios_list = {
+        'interocular_ratio': [],
+        'eye_to_nose_ratio': [],
+        'nose_to_mouth_ratio': [],
+        'chin_length_ratio': [],
+        'eyebrow_height_ratio': [],
+        'intercanthal_ratio': []
     }
 
-    valid_images = 0  # 비율 계산이 성공한 이미지 수
+    valid_images = 0  # 비율 계산에 성공한 이미지 수
+    total_images = len(image_list)  # 전체 이미지 수
 
-    for image in image_list:
-        preds = detector(image)  # 이미지에서 얼굴 랜드마크 추출
-        if len(preds) > 0:
+    print(f"총 {total_images}장의 이미지가 발견되었습니다.")
+
+    # tqdm을 사용한 진행률 표시
+    for i, image in enumerate(tqdm(image_list, desc="이미지 처리 진행 중")):
+        preds = detector(image)
+        if preds:
             keypoints = preds[0]['keypoints']
             ratios = calculate_ratios(keypoints)
-            for key in total_ratios:
-                total_ratios[key] += ratios[key]
+            for key, value in ratios.items():
+                ratios_list[key].append(value)
             valid_images += 1
 
     if valid_images == 0:
-        return None
+        return None, valid_images
 
-    # 평균 구하기
-    average_ratios = {key: value / valid_images for key, value in total_ratios.items()}
-    return average_ratios
+    # 각 비율에 대한 평균 및 표준 편차 계산
+    average_ratios = {key: np.mean(values) for key, values in ratios_list.items()}
+    std_ratios = {key: np.std(values) for key, values in ratios_list.items()}
 
-def calculate_percentage_difference(average1, average2):
-    percentage_diff = {}
+    return average_ratios, std_ratios, valid_images
+
+def calculate_percentage_difference_with_values(average1, average2):
+    percentage_diff_with_values = {}
     for key in average1:
-        # 원본 이미지와 샘플 이미지 비율의 차이를 백분율로 계산
-        percentage_diff[key] = abs(average1[key] - average2[key]) / average1[key] * 100
-    return percentage_diff
+        original_value = average1[key]
+        sample_value = average2[key]
+        percentage_diff = abs(original_value - sample_value) / original_value * 100
+        percentage_diff_with_values[key] = (original_value, sample_value, percentage_diff)
+    return percentage_diff_with_values
 
 def load_images_from_folder(folder):
     images = []
@@ -240,36 +248,33 @@ def load_images_from_folder(folder):
             images.append(img)
     return images
 
-# image = cv2.imread('assets/KakaoTalk_20240716_001234703.png')
-# preds = detector(image)
+# original_images_folder = './sample/elysia/original_images'
+# sample_images_folder = './sample/elysia/inference_images/aria_elysia_v3-10475/full body'
 
-# print(preds)
-
-original_images_folder = './sample/elysia/original_images'
-sample_images_folder = './sample/elysia/inference_images'
-
-original_images = load_images_from_folder(original_images_folder)
-sample_images = load_images_from_folder(sample_images_folder)
+# original_images = load_images_from_folder(original_images_folder)
+# sample_images = load_images_from_folder(sample_images_folder)
 
 
-# 원본 이미지의 평균 비율 계산
-original_average_ratios = calculate_average_ratios(original_images, detector)
-if original_average_ratios is None:
-    print("원본 이미지에서 얼굴을 찾지 못했습니다.")
-else:
-    print("원본 이미지 비율 계산 완료")
+# # 원본 이미지 비율 및 표준 편차 계산
+# original_average_ratios, original_std_ratios, original_valid_images = calculate_average_and_std_ratios(original_images, detector)
+# if original_average_ratios is None:
+#     print("원본 이미지에서 얼굴을 찾지 못했습니다.")
+# else:
+#     print(f"원본 이미지 비율 계산 완료 (탐지된 이미지 수: {original_valid_images}/{len(original_images)})")
 
-# 샘플 이미지의 평균 비율 계산
-sample_average_ratios = calculate_average_ratios(sample_images, detector)
-if sample_average_ratios is None:
-    print("샘플 이미지에서 얼굴을 찾지 못했습니다.")
-else:
-    print("샘플 이미지 비율 계산 완료")
+# # 샘플 이미지 비율 및 표준 편차 계산
+# sample_average_ratios, sample_std_ratios, sample_valid_images = calculate_average_and_std_ratios(sample_images, detector)
+# if sample_average_ratios is None:
+#     print("샘플 이미지에서 얼굴을 찾지 못했습니다.")
+# else:
+#     print(f"샘플 이미지 비율 계산 완료 (탐지된 이미지 수: {sample_valid_images}/{len(sample_images)})")
 
-# 두 집합 간의 비율 차이 계산 (백분율)
-if original_average_ratios is not None and sample_average_ratios is not None:
-    percentage_difference = calculate_percentage_difference(original_average_ratios, sample_average_ratios)
-
-    # 결과 출력
-    for name, diff in percentage_difference.items():
-        print(f'{name}: {diff:.2f}% 차이')
+# # 두 집합의 비율 차이 계산 및 출력
+# if original_average_ratios and sample_average_ratios:
+#     percentage_difference = calculate_percentage_difference_with_values(original_average_ratios, sample_average_ratios)
+#     print("\n비율 차이 (원본 대비 추론 값 및 차이, 표준 편차 포함):")
+#     for name, (original_value, sample_value, diff) in percentage_difference.items():
+#         print(f'{name}:')
+#         print(f'  원본 평균: {original_value:.4f}, 표준 편차: {original_std_ratios[name]:.4f}')
+#         print(f'  추론 평균: {sample_value:.4f}, 표준 편차: {sample_std_ratios[name]:.4f}')
+#         print(f'  차이: {diff:.2f}%\n')
