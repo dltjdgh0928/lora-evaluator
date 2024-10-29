@@ -1,4 +1,4 @@
-# Lora-Evaluator
+# LoRA evaluator
 
 [![Generic badge](https://img.shields.io/badge/CUDA-11.4-brightgreen.svg)](https://developer.nvidia.com/cuda-11-4-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exe_local)
 [![Generic badge](https://img.shields.io/badge/pytorch-1.12.1-orange.svg)](https://pytorch.org/get-started/previous-versions/)
@@ -13,6 +13,23 @@ This repository is based on [anime-face-detector](https://github.com/hysts/anime
 
 <img src="assets/img.png" width="400" height="300">
 <img src="assets/img_1.png" width="300" height="300">
+
+
+## Evaluate function
+
+This library enables visual analysis to determine which LoRA step achieved better training results.
+
+The evaluation function is defined as follows:
+
+$$
+\sum_{i=1}^{n} \left(| \text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_i) + \sum_{j=1}^{m} \left(| \text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_j)
+$$
+
+$n$ represents the number of detection metrics for the face, and $m$ represents the number of detection metrics for the body. $w_n$ and $w_m$ are weights selected based on the optimal balance as perceived by the user. 
+
+These weights are derived through reverse calculation under the assumption of a linear relationship; however, nonlinear adjustments can be applied as needed.
+
+Among the various LoRA steps, we will consider the step with the minimum value of this formula as the most optimal LoRA.
 
 <br/>
 

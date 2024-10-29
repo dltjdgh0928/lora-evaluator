@@ -25,12 +25,12 @@ def save_results_to_csv(data, filename):
     print(f"Results saved to {filename}")
 
 def main():
-    original_image_folder = './sample/elysia/original_images'
-    sample_image_folder = './sample/elysia/inference_images/aria_elysia_v3-10475/full body'
-    csv_filename = os.path.basename(os.path.dirname(sample_image_folder)) + '.csv'
+    original_image_folder = './sample/yokmang_arin/original_images'
+    sample_image_folder = './sample/yokmang_arin/22700'
+    csv_filename = os.path.relpath(sample_image_folder, './sample') + '.csv'
 
     output_folder = './outputs'
-    os.makedirs(output_folder, exist_ok=True)
+    os.makedirs(os.path.join(output_folder, os.path.dirname(csv_filename)), exist_ok=True)
     csv_filepath = os.path.join(output_folder, csv_filename)
 
     original_body_ratios, original_std_ratios, original_min_ratios, original_max_ratios, original_valid_images = analyze_body_folder(original_image_folder)
