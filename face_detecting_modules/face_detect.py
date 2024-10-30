@@ -147,71 +147,65 @@ right_eye_index = 19  # 오른쪽 바깥 눈
 face_left_index = 0  # 얼굴 광대 왼쪽
 face_right_index = 4  # 얼굴 광대 오른쪽
 
-
-# 거리 계산 함수
 def calculate_distance(point1, point2):
     """두 점 사이의 유클리드 거리를 계산"""
     return np.linalg.norm(np.array(point1) - np.array(point2))
 
-
-# 비율을 계산하는 함수
 def calculate_ratios(landmarks):
-    # 얼굴 너비와 높이 계산
     face_width = calculate_distance(landmarks[face_left_index], landmarks[face_right_index])
 
-    # 얼굴 높이는 왼쪽과 오른쪽 눈썹 중간의 평균 지점과 턱 끝 사이 거리
     brow_center = (np.array(landmarks[left_brow_index]) + np.array(landmarks[right_brow_index])) / 2
     face_height = calculate_distance(brow_center, landmarks[chin_index])
 
-    # 1. 눈 사이 거리 비율
-    interocular_distance = calculate_distance(landmarks[left_eye_index], landmarks[right_eye_index])
-    interocular_ratio = interocular_distance / face_width
+    # 1. outer canthal distance (OCD)
+    outer_canthal_distance = calculate_distance(landmarks[left_eye_index], landmarks[right_eye_index])
+    outer_canthal_ratio = outer_canthal_distance / face_width
 
-    # 2. 눈-코 거리 비율
+    # 2. inner canthal distance (ICD)
+    inner_canthal_distance = calculate_distance(landmarks[eye_inner_left_index], landmarks[eye_inner_right_index])
+    inter_canthal_ratio = inner_canthal_distance / face_width
+
+    # 3. eye - nose
     eye_to_nose_distance = (calculate_distance(landmarks[left_eye_index], landmarks[nose_tip_index]) + calculate_distance(landmarks[right_eye_index], landmarks[nose_tip_index])) / 2
     eye_to_nose_ratio = eye_to_nose_distance / face_height
 
-    # 3. 코-입 거리 비율
+    # 4. nose - mouth
     nose_to_mouth_distance = calculate_distance(landmarks[nose_tip_index], landmarks[up_mouth_index])
     nose_to_mouth_ratio = nose_to_mouth_distance / face_height
 
-    # 4. 턱 길이 비율 (턱 끝에서 코 끝까지)
+    # 5. chin length
     chin_to_nose_distance = calculate_distance(landmarks[chin_index], landmarks[nose_tip_index])
     chin_length_ratio = chin_to_nose_distance / face_height
 
-    # 5. 눈썹 높이 비율 (눈과 눈썹 사이 거리)
+    # 6. eyebrow height
     eyebrow_height = (calculate_distance(landmarks[left_eye_index], landmarks[left_brow_index]) + calculate_distance(landmarks[right_eye_index], landmarks[right_brow_index])) / 2
     eyebrow_height_ratio = eyebrow_height / face_height
 
-    # 6. 미간 거리 비율 (눈 안쪽 모서리 사이 거리)
-    intercanthal_distance = calculate_distance(landmarks[eye_inner_left_index], landmarks[eye_inner_right_index])
-    intercanthal_ratio = intercanthal_distance / face_width
 
     return {
-        'interocular_ratio': interocular_ratio,
+        'outer_canthal_distance': outer_canthal_ratio,
+        'inner_canthal_ratio': inter_canthal_ratio,
         'eye_to_nose_ratio': eye_to_nose_ratio,
         'nose_to_mouth_ratio': nose_to_mouth_ratio,
         'chin_length_ratio': chin_length_ratio,
         'eyebrow_height_ratio': eyebrow_height_ratio,
-        'intercanthal_ratio': intercanthal_ratio
     }
     
 def calculate_average_and_std_ratios(image_list):
     ratios_list = {
-        'interocular_ratio': [],
+        'outer_ocular_ratio': [],
+        'inner_canthal_ratio': [],
         'eye_to_nose_ratio': [],
         'nose_to_mouth_ratio': [],
         'chin_length_ratio': [],
-        'eyebrow_height_ratio': [],
-        'intercanthal_ratio': []
+        'eyebrow_height_ratio': []
     }
 
-    valid_images = 0  # 비율 계산에 성공한 이미지 수
-    total_images = len(image_list)  # 전체 이미지 수
+    valid_images = 0
+    total_images = len(image_list)
 
     print(f"총 {total_images}장의 이미지가 발견되었습니다.")
 
-    # tqdm을 사용한 진행률 표시
     for i, image in enumerate(tqdm(image_list, desc="이미지 처리 진행 중")):
         preds = detector(image)
         if preds:
@@ -224,7 +218,6 @@ def calculate_average_and_std_ratios(image_list):
     if valid_images == 0:
         return None, valid_images
 
-    # 각 비율에 대한 평균, 표준 편차, 최소값 및 최대값 계산
     average_ratios = {key: np.mean(values) for key, values in ratios_list.items()}
     std_ratios = {key: np.std(values) for key, values in ratios_list.items()}
     min_ratios = {key: np.min(values) for key, values in ratios_list.items()}

@@ -6,20 +6,20 @@
 [![Generic badge](https://img.shields.io/badge/mmdet-1.12.1-red.svg)](https://github.com/open-mmlab/mmdetection)
 [![Generic badge](https://img.shields.io/badge/mmpose-1.12.1-red.svg)](https://github.com/open-mmlab/mmpose)
 
- Lora-Evaluator is a powerful tool designed to combine anime face detection and body detection to analyze how similar a character is to its original form after model training. This repository integrates state-of-the-art technologies to assess the accuracy and consistency between the original and trained character models.
+ Lora-Evaluator is a powerful tool designed to combine anime face detection and body detection to analyze how similar a character is to its original form after model training. 
 
- 
-This repository is based on [anime-face-detector](https://github.com/hysts/anime-face-detector) repository and provides both face and body analysis to ensure precise similarity detection.
+Facial detection is based on [anime-face-detector](https://github.com/hysts/anime-face-detector) repository and provides face analysis to ensure precise similarity detection.
 
-<img src="assets/img.png" width="400" height="300">
-<img src="assets/img_1.png" width="300" height="300">
+<img src="assets/img_1.png" width="400" height="300">
+<img src="assets/img_2.png" width="300" height="300">
 
+<br/>
 
 ## Evaluate function
 
 This library enables visual analysis to determine which LoRA step achieved better training results.
 
-The evaluation function is defined as follows:
+The **evaluation function** is defined as follows:
 
 $$
 \sum_{i=1}^{n} \left(| \text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_i) + \sum_{j=1}^{m} \left(| \text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_j)
@@ -30,6 +30,45 @@ $n$ represents the number of detection metrics for the face, and $m$ represents 
 These weights are derived through reverse calculation under the assumption of a linear relationship; however, nonlinear adjustments can be applied as needed.
 
 Among the various LoRA steps, we will consider the step with the minimum value of this formula as the most optimal LoRA.
+
+<br/>
+
+## Landmarks metric
+In our analysis, we consider the following key ratios of **facial** and **body landmarks**. These metrics help to assess proportions and spatial relationships between various points on the face and body, providing insights into symmetry and structural balance.
+
+<br/>
+
+1. Facial Metrics
+
+<img src="assets/img_3.png" width="420" height="400">
+
+<br/>
+
+The face metrics are defined in relation to face width or face height.
+
+(1) Outer Canthal Distance (OCD) [11-19] : Face Width [0-4]
+
+(2) Inner Canthal Distance (ICD) [13-17] : Face Width [0-4]
+
+(3) Eye to Nose Distance [avg(12-23, 18-23)] : Face Height [midpoint of 7 and 8 - 2]
+
+(4) Nose to Mouth Distance [23-25] : Face Height [midpoint of 7 and 8 - 2]
+
+(5) Chin Length [23-2] : Face Height [midpoint of 7 and 8 - 2]
+
+(6) Eyebrow Height [avg(6-12, 9-18)] : Face Height [midpoint of 7 and 8 - 2]
+
+<br/><br/>
+
+2. Body Metrics
+
+<img src="assets/img_4.png" width="550" height="400">
+
+<br/>
+
+The body metrics focus on the proportions between different body parts, particularly the shoulder and waist width.
+
+(1) Shoulder Width [12-11] : Waist Width [24-23]
 
 <br/>
 

@@ -66,29 +66,29 @@ def analyze_image(image_path):
 
         # 비율 계산
         shoulder_to_waist_ratio = calculate_ratio(shoulder_width, waist_width)
-        upper_to_forearm_ratio = calculate_ratio(right_upper_arm + left_upper_arm, right_forearm + left_forearm)
-        thigh_to_calf_ratio = calculate_ratio(right_thigh + left_thigh, right_calf + left_calf)
-        total_arm = right_upper_arm + right_forearm + left_upper_arm + left_forearm
-        total_leg = right_thigh + right_calf + left_thigh + left_calf
-        arm_to_leg_ratio = calculate_ratio(total_arm, total_leg)
-        waist_to_leg_ratio = calculate_ratio(waist_width, total_leg / 2)
+        # upper_to_forearm_ratio = calculate_ratio(right_upper_arm + left_upper_arm, right_forearm + left_forearm)
+        # thigh_to_calf_ratio = calculate_ratio(right_thigh + left_thigh, right_calf + left_calf)
+        # total_arm = right_upper_arm + right_forearm + left_upper_arm + left_forearm
+        # total_leg = right_thigh + right_calf + left_thigh + left_calf
+        # arm_to_leg_ratio = calculate_ratio(total_arm, total_leg)
+        # waist_to_leg_ratio = calculate_ratio(waist_width, total_leg / 2)
 
         return {
             'shoulder_to_waist': shoulder_to_waist_ratio,
-            'upper_to_forearm': upper_to_forearm_ratio,
-            'thigh_to_calf': thigh_to_calf_ratio,
-            'arm_to_leg': arm_to_leg_ratio,
-            'waist_to_leg': waist_to_leg_ratio
+            # 'upper_to_forearm': upper_to_forearm_ratio,
+            # 'thigh_to_calf': thigh_to_calf_ratio,
+            # 'arm_to_leg': arm_to_leg_ratio,
+            # 'waist_to_leg': waist_to_leg_ratio
         }
 
 def calculate_average_and_std_ratios(folder_path):
     """폴더 내의 모든 이미지를 분석하고 평균 및 표준 편차를 계산"""
     total_ratios = {
         'shoulder_to_waist': [],
-        'upper_to_forearm': [],
-        'thigh_to_calf': [],
-        'arm_to_leg': [],
-        'waist_to_leg': []
+        # 'upper_to_forearm': [],
+        # 'thigh_to_calf': [],
+        # 'arm_to_leg': [],
+        # 'waist_to_leg': []
     }
     num_images = 0
     valid_images = 0  # 비율 계산에 성공한 이미지 수
