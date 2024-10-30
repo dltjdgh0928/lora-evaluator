@@ -22,7 +22,7 @@ This library enables visual analysis to determine which LoRA step achieved bette
 The **evaluation function** is defined as follows:
 
 $$
-\sum_{i=1}^{n} \left(| \text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_i) + \sum_{j=1}^{m} \left(| \text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_j)
+\sum_{i=1}^{n} \left(|\text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_i) + \sum_{j=1}^{m} \left(|\text{avg(origin ratio)} - \text{avg(infer ratio)} \right| \times w_j)
 $$
 
 $n$ represents the number of detection metrics for the face, and $m$ represents the number of detection metrics for the body. $w_n$ and $w_m$ are weights selected based on the optimal balance as perceived by the user. 
