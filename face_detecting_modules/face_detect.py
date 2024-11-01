@@ -193,7 +193,7 @@ def calculate_ratios(landmarks):
     
 def calculate_average_and_std_ratios(image_list):
     ratios_list = {
-        'outer_ocular_ratio': [],
+        'outer_canthal_distance': [],
         'inner_canthal_ratio': [],
         'eye_to_nose_ratio': [],
         'nose_to_mouth_ratio': [],
