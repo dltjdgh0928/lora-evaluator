@@ -25,8 +25,8 @@ def save_results_to_csv(data, filename):
     print(f"Results saved to {filename}")
 
 def main():
-    original_image_folder = './sample/yokmang_arin/original_images'
-    sample_image_folder = './sample/yokmang_arin/1200'
+    original_image_folder = './sample/elysia/original_images'
+    sample_image_folder = './sample/elysia/10475'
     csv_filename = os.path.relpath(sample_image_folder, './sample') + '.csv'
 
     output_folder = './outputs'

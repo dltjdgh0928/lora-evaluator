@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 # CSV 파일이 저장된 폴더 경로
-csv_folder = './outputs/yokmang_arin'
+csv_folder = './outputs/elysia'
 
 # 각 비율에 대한 가중치
 weights = {
