@@ -123,21 +123,7 @@ pip install mmdet==2.28.2
 pip install mmpose==0.29.0
 pip install numpy==1.23.5
 pip install mediapipe
+pip install anime_face_detector
 ```
 
 ⚙️ This package has been tested on Windows.
-
-ll mmpose==0.29.0
-pip install numpy==1.23.5
-pip install mediapipe
-```
-
-⚙️ This package has been tested on Windows.
-
-tall mmpose==0.29.0
-pip install numpy==1.23.5
-pip install mediapipe
-```
-
-⚙️ This package has been tested on Windows.
-
