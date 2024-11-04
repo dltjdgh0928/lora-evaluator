@@ -23,7 +23,7 @@ The **evaluation function** is defined as follows:
 
 <br/>
 
-<img src="assets/evaluate_function.png" width="800" height="70">
+<img src="assets/evaluate_function.png" width="600" height="70">
 
 <br/>
 
