@@ -21,14 +21,15 @@ This library enables visual analysis to determine which LoRA step achieved bette
 
 The **evaluation function** is defined as follows:
 
-$$
-\sum_{i=1}^{n} \left[\left|\frac{1}{N_{\text{origin}}} \sum_{k=1}^{N_{\text{origin}}} \text{ratio(origin)}_{i,k} - \frac{1}{N_{\text{sample}}} \sum_{k=1}^{N_{\text{sample}}} \text{ratio(infer)}_{i,k}\right| \times α_i \right] + \sum_{j=1}^{m} \left[\left|\frac{1}{N_{\text{origin}}} \sum_{k=1}^{N_{\text{origin}}} \text{ratio(origin)}_{j,k} - \frac{1}{N_{\text{sample}}} \sum_{k=1}^{N_{\text{sample}}} \text{ratio(infer)}_{j,k}\right| \times β_j \right]
-$$
+<br/>
+<img src="assets/evaluate_function.png" width="900" height="80">
 
-- $ i $ represents the metrics for the body, while $ j $ represents the metrics for the face.
-- The weights $ α_i $ and $ β_j $ are chosen based on the optimal balance as perceived by the user.
-- $ k $ denotes the index of each image in the dataset and is used to calculate the difference between the original and inferred ratios for each image.
-- $ N $ represents the total number of images used in calculating the average difference between the original and inferred ratios. Note that the number of images for the sample and the original datasets may differ, and each average is calculated separately for them.
+<br/>
+
+- $i$ represents the metrics for the body, while $j$ represents the metrics for the face.
+- The weights $α_i$ and $β_j$ are chosen based on the optimal balance as perceived by the user.
+- $k$ denotes the index of each image in the dataset and is used to calculate the difference between the original and inferred ratios for each image.
+- $N$ represents the total number of images used in calculating the average difference between the original and inferred ratios. Note that the number of images for the sample and the original datasets may differ, and each average is calculated separately for them.
 
 <br/>
 Among the various LoRA steps, we will consider the step with the minimum value of this formula as the most optimal LoRA.
