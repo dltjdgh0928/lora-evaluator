@@ -4,7 +4,9 @@
 [![Generic badge](https://img.shields.io/badge/pytorch-1.12.1-orange.svg)](https://pytorch.org/get-started/previous-versions/)<br/><br/>
 [![Generic badge](https://img.shields.io/badge/mmcv_full-1.6.2-red.svg)](https://mmcv.readthedocs.io/en/v1.6.2/get_started/installation.html)
 [![Generic badge](https://img.shields.io/badge/mmdet-1.12.1-red.svg)](https://github.com/open-mmlab/mmdetection)
-[![Generic badge](https://img.shields.io/badge/mmpose-1.12.1-red.svg)](https://github.com/open-mmlab/mmpLora-E Lora-Evaluator is a powerful tool designed to combine anime face detection and body detection to analyze how similar a character is to its original form after model training. 
+[![Generic badge](https://img.shields.io/badge/mmpose-1.12.1-red.svg)](https://github.com/open-mmlab/mmpose)
+
+Lora-Evaluator is a powerful tool designed to combine anime face detection and body detection to analyze how similar a character is to its original form after model training.
 
 Facial detection is based on [anime-face-detector](https://github.com/hysts/anime-face-detector) repository and provides face analysis to ensure precise similarity detection.
 
@@ -90,7 +92,7 @@ The optimal values of $α_i$ and $β_j$, determined experimentally for assessing
 
 ## Use Case
 ```bash
-10475.csv:
+step_10475.csv:
   Shoulder To Waist: Weighted Score = 1.2105
   Outer Canthal Distance: Weighted Score = 1.8304
   Inner Canthal Ratio: Weighted Score = 0.7941
@@ -100,7 +102,7 @@ The optimal values of $α_i$ and $β_j$, determined experimentally for assessing
   Eyebrow Height Ratio: Weighted Score = 1.8168
   Total Weighted Score = 8.7974
 
-850.csv:
+step_850.csv:
   Shoulder To Waist: Weighted Score = 0.8933
   Outer Canthal Distance: Weighted Score = 1.3455
   Inner Canthal Ratio: Weighted Score = 1.1175
