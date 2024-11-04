@@ -21,7 +21,7 @@ This library enables visual analysis to determine which LoRA step achieved bette
 
 The **evaluation function** is defined as follows:
 
-$$\sum_{i=1}^{n} \left[\left|\frac{1}{N_{\text{origin}}} \sum_{k=1}^{N_{\text{origin}}} \text{ratio(origin)}_{i,k} - \frac{1}{N_{\text{sample}}} \sum_{k=1}^{N_{\text{sample}}} \text{ratio(infer)}_{i,k}\right| \times α_i \right] + \sum_{j=1}^{m} \left[\left|\frac{1}{N_{\text{origin}}} \sum_{k=1}^{N_{\text{origin}}} \text{ratio(origin)}_{j,k} - \frac{1}{N_{\text{sample}}} \sum_{k=1}^{N_{\text{sample}}} \text{ratio(infer)}_{j,k}\right| \times β_j \right]$$
+$\sum_{i=1}^{n} \left[\left|\frac{1}{N_{\text{origin}}} \sum_{k=1}^{N_{\text{origin}}} \text{ratio(origin)}_{i,k} - \frac{1}{N_{\text{sample}}} \sum_{k=1}^{N_{\text{sample}}} \text{ratio(infer)}_{i,k}\right| \times α_i \right] + \sum_{j=1}^{m} \left[\left|\frac{1}{N_{\text{origin}}} \sum_{k=1}^{N_{\text{origin}}} \text{ratio(origin)}_{j,k} - \frac{1}{N_{\text{sample}}} \sum_{k=1}^{N_{\text{sample}}} \text{ratio(infer)}_{j,k}\right| \times β_j \right]$
 
 - $i$ represents the metrics for the body, while $j$ represents the metrics for the face.
 - The weights $α_i$ and $β_j$ are chosen based on the optimal balance as perceived by the user.
