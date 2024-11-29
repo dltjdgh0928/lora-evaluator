@@ -1,4 +1,4 @@
-# LoRA evaluator by FLEXENM
+# LoRA evaluator
 
 [![Generic badge](https://img.shields.io/badge/CUDA-11.4-brightgreen.svg)](https://developer.nvidia.com/cuda-11-4-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exe_local)
 [![Generic badge](https://img.shields.io/badge/pytorch-1.12.1-orange.svg)](https://pytorch.org/get-started/previous-versions/)<br/><br/>
